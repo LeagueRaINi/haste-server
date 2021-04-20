@@ -152,13 +152,6 @@ app.use(route(function(router) {
   });
 }));
 
-// Otherwise, try to match node modules
-app.use(connect_st({
-  path: __dirname + '/node_modules',
-  content: { maxAge: config.staticMaxAge },
-  url: "/node_modules"
-}));
-
 // And match index
 app.use(connect_st({
   path: __dirname + '/static',
