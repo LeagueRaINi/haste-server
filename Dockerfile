@@ -1,7 +1,6 @@
 FROM node:14.8.0-stretch
 
-RUN mkdir -p /usr/src/app && \
-    chown node:node /usr/src/app
+RUN mkdir -p /usr/src/app && chown node:node /usr/src/app
 
 USER node:node 
 
@@ -16,48 +15,45 @@ RUN npm install && \
     npm install aws-sdk@2.738.0 && \
     npm install rethinkdbdash@2.3.31
 
-ENV STORAGE_TYPE=memcached \
-    STORAGE_HOST=127.0.0.1 \
-    STORAGE_PORT=11211\
-    STORAGE_EXPIRE_SECONDS=2592000\
-    STORAGE_DB=2 \
+ENV HOST=0.0.0.0 \
+    PORT=7777 \
+    KEY_LENGTH=10 \
+    MAX_LENGTH=400000 \
+    STATIC_MAX_AGE=86400 \
+    RECOMPRESS_STATIC_ASSETS=true \
+    DOCUMENTS=about=./about.md \
+    # Storage
+    STORAGE_TYPE=file \
+    STORAGE_FILEPATH= \
+    STORAGE_HOST= \
+    STORAGE_PORT= \
+    STORAGE_EXPIRE_SECONDS= \
+    STORAGE_DB= \
     STORAGE_AWS_BUCKET= \
     STORAGE_AWS_REGION= \
-    STORAGE_USENAMER= \
+    STORAGE_USERNAME= \
     STORAGE_PASSWORD= \
-    STORAGE_FILEPATH= 
-
-ENV LOGGING_LEVEL=verbose \
+    # Logging
+    LOGGING_LEVEL=verbose \
     LOGGING_TYPE=Console \
-    LOGGING_COLORIZE=true
-
-ENV HOST=0.0.0.0\
-    PORT=7777\
-    KEY_LENGTH=10\
-    MAX_LENGTH=400000\
-    STATIC_MAX_AGE=86400\
-    RECOMPRESS_STATIC_ASSETS=true
-
-ENV KEYGENERATOR_TYPE=phonetic \
-    KEYGENERATOR_KEYSPACE=
-
-ENV RATELIMITS_NORMAL_TOTAL_REQUESTS=500\
+    LOGGING_COLORIZE=true \
+    # Key Generator
+    KEYGENERATOR_TYPE=phonetic \
+    KEYGENERATOR_KEYSPACE= \
+    # Rate Limits
+    RATELIMITS_NORMAL_TOTAL_REQUESTS=500\
     RATELIMITS_NORMAL_EVERY_MILLISECONDS=60000 \
     RATELIMITS_WHITELIST_TOTAL_REQUESTS= \
     RATELIMITS_WHITELIST_EVERY_MILLISECONDS=  \
-    # comma separated list for the whitelisted \
-    RATELIMITS_WHITELIST=example1.whitelist,example2.whitelist \
-    \   
+    RATELIMITS_WHITELIST= \
     RATELIMITS_BLACKLIST_TOTAL_REQUESTS= \
     RATELIMITS_BLACKLIST_EVERY_MILLISECONDS= \
-    # comma separated list for the blacklisted \
-    RATELIMITS_BLACKLIST=example1.blacklist,example2.blacklist 
-ENV DOCUMENTS=about=./about.md
+    RATELIMITS_BLACKLIST=
 
 EXPOSE ${PORT}
 STOPSIGNAL SIGINT
-ENTRYPOINT [ "bash", "docker-entrypoint.sh" ]
+ENTRYPOINT ["/bin/sh", "./docker-entrypoint.sh"]
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s \
-    --retries=3 CMD [ "curl" , "-f" "localhost:${PORT}", "||", "exit", "1"]
-CMD ["npm", "start"]
+HEALTHCHECK CMD curl --fail ${HOST}:${PORT} || exit 1
+
+CMD ["node", "server.js"]
