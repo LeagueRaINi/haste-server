@@ -56,4 +56,4 @@ ENTRYPOINT ["/bin/sh", "./docker-entrypoint.sh"]
 
 HEALTHCHECK CMD curl --fail ${HOST}:${PORT} || exit 1
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
