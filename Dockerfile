@@ -9,6 +9,7 @@ WORKDIR /usr/src/app
 COPY --chown=node:node . . 
 
 RUN npm install && \
+    npm install mongodb@3.6.6 && \
     npm install redis@0.8.1 && \
     npm install pg@4.1.1 && \
     npm install memcached@2.2.2 && \
